@@ -13,38 +13,39 @@
 #include <time.h>
 #include <atomic>
 #include <random>
+#include <iostream>
+#include <thread>
+#include <fmt/format.h>
+#include <future>
 
-#if (defined (WIN32))
-#include <zhelpers.hpp>
-#endif
 
-#define within(num) (int) ((float) num * random () / (RAND_MAX + 1.0))
+#include "pubsub.h"
 
 int main() {
-
-    //  Prepare our context and publisher
-    zmq::context_t context(1);
-    zmq::socket_t publisher(context, ZMQ_PUB);
-    publisher.bind("tcp://*:5556");
-//    publisher.bind("ipc://weather.ipc");				// Not usable on Windows.
-    std::atomic<bool> stop = false;
-    //  Initialize random number generator
-    srandom((unsigned) time(NULL));
-
-    auto rnd_dev = std::random_device();
-    while (!stop) {
-        int zipcode, temperature, relhumidity;
-
-        //  Get values that will fool the boss
-        zipcode = within (100000);
-        temperature = within (215) - 80;
-        relhumidity = within (50) + 10;
-
-        //  Send message to all subscribers
-        zmq::message_t message(20);
-        snprintf((char *) message.data(), 20,
-                 "%05d %d %d", zipcode, temperature, relhumidity);
-        publisher.send(message);
+    using namespace std::literals;
+    auto ctx = zmq::context_t(1);
+    auto pub = zmq::socket_t(ctx, zmq::socket_type::pub);
+    pub.bind("tcp://*:5555");
+    int message = 1;
+    std::atomic<bool> cancel = false;
+    auto f1 = std::async([&]() {
+        std::cout << "Press any key to stop." << std::endl;
+        std::cin.get();
+        cancel = true;
+    });
+    std::ostringstream oss;
+    while (!cancel) {
+        try {
+            auto str = fmt::format("{} {}", default_sub, message);
+            std::cout << "To send str: " << str << std::endl;
+            pub.send(zmq::message_t(str));
+            std::cout << "Sent: " << message << std::endl;
+            std::this_thread::sleep_for(2s);
+            message++;
+            if (message >= 99999) break;
+        } catch (std::exception &e) {
+            std::cout << "Some error happened... " << e.what();
+        }
     }
-    return 0;
+    std::cout << message-1 << " messages sent." << std::endl;
 }

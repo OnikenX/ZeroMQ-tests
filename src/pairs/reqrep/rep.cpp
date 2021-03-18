@@ -34,15 +34,31 @@ int main() {
     zmq::message_t received, sent;
     while (!stop) {
         auto size = replayer.recv(received);
+        auto start = std::chrono::steady_clock::now();
         if (!size.has_value() && size.value() <= 0)
             continue;
         auto s = received.to_string();
-//        unsigned long j = 0, i;
-//        for (i = s.length() - 1; i >= 0; --i)
-//            reverse_s[j++] = s[i];
         std::reverse(std::begin(s), std::end(s));
         sent = zmq::message_t(s);
         replayer.send(sent, zmq::send_flags::none);
+        auto end = std::chrono::steady_clock::now();
+        std::cout << "Elapsed time in nanoseconds : "
+             << std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count()
+             << " ns" << std::endl;
+
+        std::cout << "Elapsed time in microseconds : "
+             << std::chrono::duration_cast<std::chrono::microseconds>(end - start).count()
+             << " µs" << std::endl;
+
+        std::cout << "Elapsed time in milliseconds : "
+             << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count()
+             << " ms" << std::endl;
+
+        std::cout << "Elapsed time in seconds : "
+             << std::chrono::duration_cast<std::chrono::seconds>(end - start).count()
+             << " sec" << std::endl;
+
+
     }
     return 0;
 }

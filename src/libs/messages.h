@@ -8,13 +8,12 @@
 #include <zmq.hpp>
 #include <vector>
 #include <mutex>
-
+#include <zmq_addon.hpp>
 void sending(zmq::context_t &ctx, std::atomic<bool> &cancel);
 int exemple_multipart_message();
 void test_message();
 
 namespace pushpull{
-    static auto mtx_pubsub =  std::mutex();
     void pusher(zmq::context_t& ctx);
     void puller(zmq::context_t& ctx);
     void sinker(zmq::context_t& ctx);
