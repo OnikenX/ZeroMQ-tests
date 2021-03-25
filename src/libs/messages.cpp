@@ -72,10 +72,10 @@ void test_message() {
 
 }
 
-#define MAX_MESSAGES 100
+#define MAX_MESSAGES 99999
 void pushpull::pusher(zmq::context_t &ctx) {
     auto publisher = zmq::socket_t(ctx, zmq::socket_type::push);
-    publisher.bind("tcp://*:9000");
+    publisher.bind("tcp://*:9001");
     int create = 1;
     for (; create < MAX_MESSAGES; create++){
         publisher.send(zmq::message_t(&create, sizeof(create)), zmq::send_flags::none);
@@ -87,7 +87,7 @@ void pushpull::pusher(zmq::context_t &ctx) {
 void pushpull::puller(zmq::context_t &ctx) {
     //get data
     auto subber = zmq::socket_t(ctx, zmq::socket_type::pull);
-    subber.connect("tcp://localhost:9000");
+    subber.connect("tcp://localhost:9001");
     int created = 0;
     auto msg = zmq::message_t();
     while (created < MAX_MESSAGES) {

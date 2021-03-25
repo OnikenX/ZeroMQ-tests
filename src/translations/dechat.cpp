@@ -1,22 +1,16 @@
-//
-// Created by onikenx on 17/03/21.
-//
-
 //  Decentralized chat example
-//
 
 #include <zmq.hpp>
-#include <zmq_addon.hpp>
-#include <sstream>
 #include <future>
 #include <iostream>
-
+#define PORT 9000
 
 static void listener_task(char *args, zmq::context_t &ctx) {
     auto listener = zmq::socket_t(ctx, zmq::socket_type::sub);
     char conn_str[100];
     for (int address = 1; address < 255; address++) {
-        sprintf(conn_str, "tcp://%s%d:9000", args, address);
+        sprintf(conn_str, "tcp://%s%d:%d", args, address, PORT);
+        std::cout << "conn_str: " << conn_str << std::endl;
         listener.connect(conn_str);
     }
 
@@ -31,6 +25,8 @@ static void listener_task(char *args, zmq::context_t &ctx) {
         }
         if (!msg.empty())
             std::cout << msg.to_string() << std::endl;
+        else
+            std::cerr << "Msg empty" << std::endl;
     }
 }
 
@@ -44,11 +40,12 @@ int main(int argc, char *argv[]) {
         exit(0);
     }
     auto ctx = zmq::context_t(1);
-    auto f = std::async(std::launch::async, listener_task, argv[1], std::ref(ctx));
     auto broadcaster = zmq::socket_t(ctx, zmq::socket_type::pub);
     std::stringstream ss;
     ss << "tcp://" << argv[2] << ":9000";
     broadcaster.bind(ss.str());
+    std::cout << "binded to " << ss.str() << std::endl;
+    auto f = std::async(std::launch::async, listener_task, argv[1], std::ref(ctx));
     try {
         while (true) {
             std::string message;
@@ -60,5 +57,5 @@ int main(int argc, char *argv[]) {
     } catch (std::exception &e) {
         std::cerr << e.what() << std::endl;
     }
-
 }
+

@@ -28,20 +28,28 @@ int main() {
     //  Prepare our context and requester
     zmq::context_t context(1);
     zmq::socket_t requester(context, zmq::socket_type::req);
-    requester.connect("tcp://localhost:5556");
-    std::cout << "Write Something to be reversed, and write \"fim\" or close the keyboard to exit." << std::endl;
-    std::atomic<bool> stop = false;
-    std::string input;
-    zmq::message_t received, send;
-    while (!stop) {
-        std::cin >> input;
+    std::string ip;
 
-        if(input == "fim"s || std::cin.eof())
-            break;
-        send = zmq::message_t(input);
-        requester.send(send, zmq::send_flags::none);
-        requester.recv(received, zmq::recv_flags::none);
-        std::cout << received.to_string() << std::endl;
+    std::getline(std::cin, ip);
+    std::cout << "Got: " << ip << ";" << std::endl;
+    try {
+        requester.connect("tcp://" + ip + ":5556");
+        std::cout << "Write Something to be reversed, and write \"fim\" or close the keyboard to exit." << std::endl;
+        std::atomic<bool> stop = false;
+        std::string input;
+        zmq::message_t received, send;
+        while (!stop) {
+            std::cin >> input;
+
+            if (input == "fim"s || std::cin.eof())
+                break;
+            send = zmq::message_t(input);
+            requester.send(send, zmq::send_flags::none);
+            requester.recv(received, zmq::recv_flags::none);
+            std::cout << received.to_string() << std::endl;
+        }
+    } catch (...) {
+        exit(1);
     }
     std::cout << "Bye!" << std::endl;
     return 0;
