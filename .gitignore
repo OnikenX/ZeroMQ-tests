@@ -116,3 +116,4 @@ fabric.properties
 
 #manual build
 /build
+/cmake-build-*
