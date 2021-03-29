@@ -36,7 +36,7 @@ int main() {
     std::ostringstream oss;
     while (!cancel) {
         try {
-            auto str = fmt::format("{} {}", default_sub, message);
+            auto str = std::format("{} {}", default_sub, message);
             std::cout << "To send str: " << str << std::endl;
             pub.send(zmq::message_t(str));
             std::cout << "Sent: " << message << std::endl;

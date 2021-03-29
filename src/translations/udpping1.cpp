@@ -2,14 +2,14 @@
 //  Model 1, does UDP work inline
 
 #include <zmq.hpp>
-#include <experimental/net>
+#include <asio.hpp>
 
 
 #define PING_PORT_NUMBER 9999
 #define PING_MSG_SIZE    1
 #define PING_INTERVAL    1000  //  Once per second
 
-namespace net = std::experimental::net;
+namespace net = asio;
 
 static void
 derp(char *s) {
@@ -17,7 +17,7 @@ derp(char *s) {
     exit(1);
 }
 
-int main() {
+int main(int argc, char * argv[]) {
     //context
     auto zmq_ctx = zmq::context_t(1);
     auto net_ctx = net::io_context(1);
@@ -84,8 +84,6 @@ int main() {
             ping_at = zclock_time() + PING_INTERVAL;
         }
     }
-    close(fd);
-    zctx_destroy(&ctx);
     return 0;
 }
 
