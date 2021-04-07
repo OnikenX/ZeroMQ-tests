@@ -1,14 +1,10 @@
 cmake_minimum_required(VERSION 3.17.5)
 
-set(CMAKE_CXX_STANDARD 20)
+set(HUNTER_ROOT ".cmake/Hunter")
 include("cmake/HunterGate.cmake")
-HunterGate(
-        URL "https://github.com/cpp-pm/hunter/archive/v0.23.296.tar.gz"
-        SHA1 "232f5022ee1d45955a7e8d3e1720f31bac1bb534"
-)
 
 project(ZeroMQ_tests)
-
+set(CMAKE_CXX_STANDARD 20)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread -Wall -Wextra" #[[-fsanitize=address]])
@@ -60,6 +56,4 @@ add_executable(udptest src/udp/udptest.cpp)
 add_executable(asio_test src/asio/asio_main.cpp)
 
 ## libp2p tests
-hunter_add_package(libp2p)
-find_package(libp2p REQUIRED)
 add_executable(p2pchat src/libp2p/p2pchat.cpp)
